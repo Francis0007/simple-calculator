@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Calculator</title>
+
+  <style>
+      #app {
+          width: 300px;
+      }
+
+      .display {
+          width: 228px;
+          padding: 10px;
+          color: #fff;
+          background: #333;
+          display: flex;
+          align-items: center;
+          justify-content: flex-end;
+          height: 40px;
+          font-size: 22px;
+      }
+
+      .row {
+          display: flex;
+          width: 100%;
+      }
+
+      .btn {
+          color: #fff;
+          width: 60px;
+          height: 60px;
+          font-size: 20px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border: 0.05rem solid #000;
+          cursor: pointer;
+      }
+
+      .btn:hover {
+          opacity: 0.8;
+      }
+
+      .btn-0 {
+          width: 122px;
+      }
+
+      .bg-gray-1 {
+          background-color: #4a5568;
+      }
+
+      .bg-gray-2 {
+          background-color: #a0aec0;
+      }
+
+      .bg-orange {
+          background-color: #ed8936;
+      }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="display">
+      0
+    </div>
+    <div class="row">
+      <div class="btn bg-gray-1 btn-ac">
+        AC
+      </div>
+      <div class="btn bg-gray-1 btn-negate">
+        +/-
+      </div>
+      <div class="btn bg-gray-1 btn-percent">
+        %
+      </div>
+      <div class="btn bg-orange btn-divide">
+        ÷
+      </div>
+    </div>
+    <div class="row">
+      <div class="btn bg-gray-2 btn-7">
+        7
+      </div>
+      <div class="btn bg-gray-2 btn-8">
+        8
+      </div>
+      <div class="btn bg-gray-2 btn-9">
+        9
+      </div>
+      <div class="btn bg-orange btn-times">
+        X
+      </div>
+    </div>
+    <div class="row">
+      <div class="btn bg-gray-2 btn-4">
+        4
+      </div>
+      <div class="btn bg-gray-2 btn-5">
+        5
+      </div>
+      <div class="btn bg-gray-2 btn-6">
+        6
+      </div>
+      <div class="btn bg-orange btn-minus">
+        -
+      </div>
+    </div>
+    <div class="row">
+      <div class="btn bg-gray-2 btn-1">
+        1
+      </div>
+      <div class="btn bg-gray-2 btn-2">
+        2
+      </div>
+      <div class="btn bg-gray-2 btn-3">
+        3
+      </div>
+      <div class="btn bg-orange btn-plus">
+        +
+      </div>
+    </div>
+    <div class="row">
+      <div class="btn bg-gray-2 btn-0">
+        0
+      </div>
+      <div class="btn bg-gray-2 btn-comma">
+        ,
+      </div>
+      <div class="btn bg-orange btn-res">
+        =
+      </div>
+    </div>
+  </div>
+
+  <script type="text/javascript">
+    let result = 0;
+    let current = 0;
+    let display = '0';
+    let isComma = false;
+    let lastOperator = null;
+    let isFinish = false
+
+    function updateDisplay() {
+      document.getElementsByClassName('display')[0].innerHTML = String(display).replace('.', ',');
+    }
+
+    for (let i=1; i <= 9; i++) {
+      document.getElementsByClassName('btn-' + i)[0].addEventListener('click', function () {
+        if ((lastOperator && current === 0) || isFinish) {
+          current = 0;
+          display = '0';
+        }
+        isFinish = false;
+        display = isComma || display !== '0' ? display + String(i) : String(i);
+        current = convertToNumber(display);
+        updateDisplay();
+      });
+    }
+
+    function convertToNumber(val) {
+      return String(val).includes('.') ? parseFloat(val) : Number(val);
+    }
+
+    function calculate(first, second) {
+      first = convertToNumber(first);
+      second = convertToNumber(second);
+
+      switch (lastOperator) {
+        case '+':
+          first += second;
+          break;
+        case '-':
+          first -= second;
+          break;
+        case '/':
+          first /= second;
+          break;
+        case '*':
+          first *= second;
+          break;
+        default:
+          first = second;
+          break;
+      }
+
+      return first;
+    }
+
+    function runOperator(operator) {
+      if (lastOperator) {
+        result = calculate(result, current);
+        display = String(result);
+        updateDisplay();
+      } else {
+        result = convertToNumber(display);
+      }
+      isFinish = false;
+      current = 0;
+      lastOperator = operator;
+      isComma = false;
+    }
+
+    document.getElementsByClassName('btn-0')[0].addEventListener('click', function () {
+      isFinish = false;
+      if ((!lastOperator && current === 0) || (lastOperator && !isComma)) {
+        display = '0';
+      } else {
+        display = display === '0' ? '0' : display + '0';
+      }
+      current = convertToNumber(display);
+      updateDisplay();
+    });
+    document.getElementsByClassName('btn-ac')[0].addEventListener('click', function () {
+      result = 0;
+      display = '0';
+      isComma = false;
+      lastOperator = null;
+      current = 0;
+      isFinish = false;
+      updateDisplay();
+    });
+    document.getElementsByClassName('btn-negate')[0].addEventListener('click', function () {
+      const tmp = convertToNumber(display) * -1;
+      display = String(tmp);
+      current = tmp;
+      isComma = false;
+      updateDisplay();
+    });
+    document.getElementsByClassName('btn-percent')[0].addEventListener('click', function () {
+      const tmp = convertToNumber(current) / 100;
+      console.log(tmp, String(tmp));
+      display = String(tmp);
+      current = tmp;
+      isComma = false;
+      updateDisplay();
+    });
+    document.getElementsByClassName('btn-minus')[0].addEventListener('click', function () {
+      runOperator('-');
+    });
+    document.getElementsByClassName('btn-plus')[0].addEventListener('click', function () {
+      runOperator('+');
+    });
+    document.getElementsByClassName('btn-times')[0].addEventListener('click', function () {
+      runOperator('*');
+    });
+    document.getElementsByClassName('btn-divide')[0].addEventListener('click', function () {
+      runOperator('/');
+    });
+    document.getElementsByClassName('btn-res')[0].addEventListener('click', function () {
+      const tmp = calculate(result, current);
+      isComma = false;
+      result = tmp;
+      display = String(result);
+      isFinish = true;
+      updateDisplay();
+    });
+    document.getElementsByClassName('btn-comma')[0].addEventListener('click', function () {
+      isFinish = false;
+      if ((!lastOperator && display === '0') || isComma) {
+        display = '0';
+        isComma = false;
+        current = 0;
+      }
+
+      if (!isComma) {
+        const tmp = convertToNumber(display);
+        if (!isNaN(tmp)) {
+          isComma = true;
+          display = (lastOperator && display === '0' ? '0' : String(display)) + '.';
+          current = convertToNumber(display);
+          updateDisplay();
+        }
+      }
+    });
+  </script>
+</body>
+</html>
